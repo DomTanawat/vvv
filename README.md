@@ -1,1 +1,209 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<title>ระบบสุริยะ</title>
+<style>
+  body {
+    margin: 0;
+    overflow: hidden;
+    background: radial-gradient(circle at center, #000015, #000);
+    font-family: "Prompt", sans-serif;
+    color: rgb(255, 255, 255);
+    background-color: #000;
+  }
 
+  .sun {
+    position: absolute;
+    top: 50%; 
+    left: 50%;
+    width: 180px; height: 180px;
+    background: radial-gradient(circle, #fff8a0, #ffbb33, #cc6600);
+    border-radius: 50%;
+    box-shadow: 0 0 60px 25px rgba(255,180,0,0.25);
+    transform: translate(-50%, -50%);
+    z-index: 10;
+    cursor: pointer;
+  }
+
+  .orbit {
+    position: absolute;
+    top: 50%; left: 50%;
+    border: 1px dashed rgba(255,255,255,0.08);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  .planet {
+    position: absolute;
+    border-radius: 50%;
+    background-size: cover;
+    background-position: center;
+    cursor: pointer;
+    transition: transform 0.2s;
+  }
+
+  .planet:hover { transform: scale(1.2); }
+
+  .mercury { width: 24px; height: 24px; background-image: url('https://upload.wikimedia.org/wikipedia/commons/4/4a/Mercury_in_true_color.jpg'); }
+  .venus   { width: 34px; height: 34px; background-image: url('https://upload.wikimedia.org/wikipedia/commons/e/e5/Venus-real_color.jpg'); }
+  .earth   { width: 36px; height: 36px; background-image: url('https://upload.wikimedia.org/wikipedia/commons/9/97/The_Earth_seen_from_Apollo_17.jpg'); }
+  .mars    { width: 30px; height: 30px; background-image: url('https://upload.wikimedia.org/wikipedia/commons/0/02/OSIRIS_Mars_true_color.jpg'); }
+  .jupiter { width: 90px; height: 90px; background-image: url('https://upload.wikimedia.org/wikipedia/commons/e/e2/Jupiter.jpg'); }
+  .saturn  { width: 80px; height: 80px; background-image: url('https://upload.wikimedia.org/wikipedia/commons/c/c7/Saturn_during_Equinox.jpg'); }
+  .uranus  { width: 50px; height: 50px; background-image: url('https://upload.wikimedia.org/wikipedia/commons/3/3d/Uranus2.jpg'); }
+  .neptune { width: 50px; height: 50px; background-image: url('https://upload.wikimedia.org/wikipedia/commons/5/56/Neptune_Full.jpg'); }
+
+  .star {
+    position: absolute;
+    background: white;
+    border-radius: 50%;
+    opacity: 0.8;
+    animation: twinkle 2s infinite ease-in-out;
+  }
+
+  @keyframes twinkle {
+    0%, 100% { opacity: 0.2; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.4); }
+  }
+
+  .info-box {
+    position: fixed;
+    right: 20px; top: 25px;
+    width: 340px;
+    background: rgba(10, 10, 20, 0.6);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 16px;
+    padding: 18px;
+    color: white;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 0 20px rgba(255,255,255,0.15);
+  }
+
+  .info-box h2 {
+    color: #ffd700;
+    text-shadow: 0 0 8px rgba(255,215,0,0.7);
+  }
+
+  .planet-image {
+    width: 100%;
+    border-radius: 12px;
+    margin-bottom: 10px;
+    box-shadow: 0 0 10px rgba(255,255,255,0.2);
+  }
+
+  iframe {
+    width: 100%;
+    height: 200px;
+    border-radius: 12px;
+    border: none;
+    margin-top: 10px;
+  }
+</style>
+</head>
+<body>
+  <div id="stars"></div>
+  <div class="sun" id="sun"></div>
+
+  <!-- วงโคจร -->
+  <div class="orbit" style="width:220px; height:220px;"></div>
+  <div class="orbit" style="width:320px; height:320px;"></div>
+  <div class="orbit" style="width:440px; height:440px;"></div>
+  <div class="orbit" style="width:560px; height:560px;"></div>
+  <div class="orbit" style="width:720px; height:720px;"></div>
+  <div class="orbit" style="width:880px; height:880px;"></div>
+  <div class="orbit" style="width:1040px; height:1040px;"></div>
+  <div class="orbit" style="width:1200px; height:1200px;"></div>
+
+  <!-- ดาว -->
+  <div class="planet mercury" id="mercury"></div>
+  <div class="planet venus" id="venus"></div>
+  <div class="planet earth" id="earth"></div>
+  <div class="planet mars" id="mars"></div>
+  <div class="planet jupiter" id="jupiter"></div>
+  <div class="planet saturn" id="saturn"></div>
+  <div class="planet uranus" id="uranus"></div>
+  <div class="planet neptune" id="neptune"></div>
+
+  <div class="info-box" id="info-box">
+  <h2>ระบบสุริยะ 🌞</h2>
+  <p>คลิกที่ดาวเพื่อดูรายละเอียดเพิ่มเติม!</p>
+
+</div>
+
+
+  <script>
+    const centerX = window.innerWidth / 2;
+    const centerY = window.innerHeight / 2;
+    const infoBox = document.getElementById('info-box');
+
+    // 🌟 ดาวระยิบระยับ
+    const starsContainer = document.getElementById('stars');
+    for (let i = 0; i < 300; i++) {
+      const star = document.createElement('div');
+      star.classList.add('star');
+      const size = Math.random() * 2 + 1;
+      star.style.width = `${size}px`;
+      star.style.height = `${size}px`;
+      star.style.left = `${Math.random() * window.innerWidth}px`;
+      star.style.top = `${Math.random() * window.innerHeight}px`;
+      star.style.animationDuration = `${2 + Math.random() * 3}s`;
+      starsContainer.appendChild(star);
+    }
+
+    // ☀️ ดวงอาทิตย์
+    const sun = {
+      id: 'sun',
+      name: 'ดวงอาทิตย์',
+      desc: 'ดวงอาทิตย์เป็นดาวฤกษ์ศูนย์กลางของระบบสุริยะ ให้พลังงานแสงและความร้อนแก่ดาวเคราะห์ทุกดวง',
+      size: '1,392,700 กม.',
+      type: 'ดาวฤกษ์ประเภท G2V (ดาวแคระเหลือง)',
+      temp: '5,500°C / 15,000,000°C',
+      image: 'https://www.pw.ac.th/emedia/media/science/lesa/2/sun/sun/sun.jpg',
+      video: 'https://www.youtube.com/watch?v=2HoTK_Gqi2Q'
+    };
+
+    const planets = [
+      { id:'mercury', name:'ดาวพุธ', radius:110, speed:0.008, desc:'ดาวเคราะห์ที่ใกล้ดวงอาทิตย์ที่สุด', size:'4,879 กม.',moons:'ไม่มี',temp:'167°C',image:'https://upload.wikimedia.org/wikipedia/commons/4/4a/Mercury_in_true_color.jpg', video:'https://www.youtube.com/embed/Xy1-pgGQFQY' },
+      { id:'venus', name:'ดาวศุกร์', radius:160, speed:0.006, desc:'ดาวเคราะห์ที่ร้อนที่สุด ปกคลุมด้วยเมฆกรดกำมะถัน', size:'12,104 กม.', moons:'ไม่มี', temp:'462°C', image:'https://upload.wikimedia.org/wikipedia/commons/e/e5/Venus-real_color.jpg', video:'https://www.youtube.com/embed/VgHYfdY4Q1A' },
+      { id:'earth', name:'โลก', radius:220, speed:0.005, desc:'ดาวเคราะห์แห่งชีวิต มีน้ำและอากาศ', size:'12,742 กม.',moons:'1 ดวง', temp:'15°C', image:'https://upload.wikimedia.org/wikipedia/commons/9/97/The_Earth_seen_from_Apollo_17.jpg', video:'https://www.youtube.com/embed/HCDVN7DCzYE' },
+      { id:'mars', name:'ดาวอังคาร', radius:280, speed:0.004, desc:'ดาวสีแดงที่อาจเคยมีน้ำ', size:'6,779 กม.', moons:'2 ดวง', temp:'-60°C', image:'https://upload.wikimedia.org/wikipedia/commons/0/02/OSIRIS_Mars_true_color.jpg', video:'https://www.youtube.com/embed/D8pnmwOXhoY' },
+      { id:'jupiter', name:'ดาวพฤหัสบดี', radius:360, speed:0.003, desc:'ดาวที่ใหญ่ที่สุด มีจุดแดงใหญ่', size:'139,820 กม.', moons:'90+', temp:'-110°C', image:'https://upload.wikimedia.org/wikipedia/commons/e/e2/Jupiter.jpg', video:'https://www.youtube.com/embed/PtkqwslbLY8' },
+      { id:'saturn', name:'ดาวเสาร์', radius:460, speed:0.0025, desc:'ดาวที่มีวงแหวนสวยงาม', size:'116,460 กม.', moons:'80+', temp:'-140°C', image:'https://upload.wikimedia.org/wikipedia/commons/c/c7/Saturn_during_Equinox.jpg', video:'https://www.youtube.com/embed/epZdZaEQhS0' },
+      { id:'uranus', name:'ดาวยูเรนัส', radius:560, speed:0.002, desc:'หมุนเอียงเกือบ 90°', size:'50,724 กม.', moons:'27', temp:'-195°C', image:'https://upload.wikimedia.org/wikipedia/commons/3/3d/Uranus2.jpg', video:'https://www.youtube.com/embed/m4NXbFOiOGk' },
+      { id:'neptune', name:'ดาวเนปจูน', radius:660, speed:0.0015, desc:'ดาวที่ไกลที่สุด ลมแรงที่สุด', size:'49,244 กม.', moons:'14', temp:'-200°C', image:'https://upload.wikimedia.org/wikipedia/commons/5/56/Neptune_Full.jpg', video:'https://www.youtube.com/embed/NStn7zZKXfE' }
+    ];
+
+    planets.forEach(p => p.angle = Math.random() * Math.PI * 2);
+
+    function animate() {
+      planets.forEach(p => {
+        const el = document.getElementById(p.id);
+        p.angle += p.speed;
+        const x = centerX + p.radius * Math.cos(p.angle);
+        const y = centerY + p.radius * Math.sin(p.angle);
+        el.style.left = (x - el.offsetWidth / 2) + "px";
+        el.style.top = (y - el.offsetHeight / 2) + "px";
+      });
+      requestAnimationFrame(animate);
+    }
+    animate();
+
+    // 📘 แสดงข้อมูลพร้อมคลิป
+    function showInfo(data) {
+      infoBox.innerHTML = `
+        <img src="${data.image}" class="planet-image" alt="${data.name}">
+        <h2>${data.name}</h2>
+        <p>${data.desc}</p>
+        ${data.size ? `<p><b>ขนาด:</b> ${data.size}</p>` : ''}
+        ${data.moons ? `<p><b>ดวงจันทร์:</b> ${data.moons}</p>` : ''}
+        ${data.temp ? `<p><b>อุณหภูมิ:</b> ${data.temp}</p>` : ''}
+        ${data.video ? `<iframe src="${data.video}" allowfullscreen></iframe>` : ''}
+      `;
+    }
+
+    document.getElementById('sun').addEventListener('click', () => showInfo(sun));
+    planets.forEach(p => document.getElementById(p.id).addEventListener('click', () => showInfo(p)));
+  </script>
+</body>
+</html>
